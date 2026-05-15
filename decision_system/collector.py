@@ -26,6 +26,10 @@ WATCHLIST: dict[str, str] = {
     # 用戶重點追蹤
     "DDOG": "Datadog",     "NET": "Cloudflare",  "FN": "Fabrinet",
     "ETN": "伊頓",          "PLTR": "Palantir",   "CSCO": "Cisco",
+    # 光通訊族群
+    "AAOI": "Applied Optoelectronics", "LITE": "Lumentum",
+    "COHR": "Coherent",                "NOK":  "Nokia",
+    "AXTI": "AXT",
     # 電力基建
     "PWR": "Quanta",       "STRL": "Sterling",
     # 基準 & 板塊
