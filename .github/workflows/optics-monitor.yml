@@ -44,20 +44,14 @@ jobs:
           LLM_MODEL: MiniMax-M2.5
           REPORT_FILENAME: optics-${{ github.run_id }}.md
 
-      - name: Commit report if changed
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add reports/daily reports/weekly
-          git diff --cached --quiet || git commit -m "Add optical monitor report (run ${{ github.run_id }})"
-          git push
-
-      - name: Log completed run
+      - name: Commit report and log
         if: always()
         run: |
-          echo "$(date '+%Y-%m-%d %H:%M:%S UTC')  [optics-monitor] run=${{ github.run_id }}  conclusion=${{ job.status }}" >> reports/run_log.txt
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add reports/run_log.txt
-          git diff --cached --quiet || git commit -m "Log run ${{ github.run_id }}"
+          echo "$(date '+%Y-%m-%d %H:%M:%S UTC')  [optics-monitor] run=${{ github.run_id }}  conclusion=${{ job.status }}" >> reports/run_log.txt
+          git add reports/daily reports/weekly reports/run_log.txt
+          git diff --cached --quiet && exit 0
+          git pull --rebase origin main
+          git commit -m "optics monitor run ${{ github.run_id }}"
           git push

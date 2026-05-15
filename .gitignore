@@ -20,6 +20,9 @@ venv/
 .DS_Store
 **/.DS_Store
 
+# Run log managed by GHA — ignore locally to avoid push conflicts
+reports/run_log.txt
+
 # Data outputs — large/ephemeral, not for repo
 decision_system/data/*.json
 decision_system/journal/*.md
