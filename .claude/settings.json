@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "watch-optics",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"$(date '+%Y-%m-%d %H:%M:%S')  [watch-optics] run completed  session=$CLAUDE_SESSION_ID\" >> \"/Users/Max/Downloads/AI agent/reports/run_log.txt\""
+          }
+        ]
+      }
+    ]
+  }
+}

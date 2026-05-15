@@ -1,0 +1,193 @@
+sector: optical_communications
+base_currency: USD
+report_language: zh-TW
+
+global_thesis:
+  - "Optical communications is still early in the AI infrastructure buildout."
+  - "Revenue realization lags capex announcements."
+  - "The biggest winners are likely to be bottleneck layers rather than the whole stack equally."
+  - "Critical bottlenecks may include InP substrates, lasers / EML, high-speed modules, and selected DSP / system layers."
+
+monitoring_rules:
+  thesis_labels:
+    - strengthened
+    - weakened
+    - unchanged
+  priority_signals:
+    - customer_wins
+    - customer_concentration
+    - capacity_expansion
+    - manufacturing_shift
+    - gross_margin
+    - dilution
+    - subsidies_and_grants
+    - supply_bottleneck
+    - 800g_ramp
+    - 1_6t_ramp
+
+tickers:
+  - ticker: AAOI
+    company: Applied Optoelectronics
+    layer:
+      - lasers
+      - transceivers
+      - modules
+    thesis: >
+      AAOI may be transitioning from a narrative-driven optical AI name into a capacity-constrained manufacturer.
+      Key upside depends on execution of 800G / 1.6T ramp, InP laser capacity expansion, and Texas manufacturing scale-up.
+    bull_triggers:
+      - "800G shipment growth continues quarter over quarter"
+      - "Second 1.6T hyperscaler customer appears"
+      - "Texas manufacturing mix reaches stated milestones"
+      - "Gross margin tracks toward year-end target"
+      - "Management continues to indicate demand exceeds supply"
+    bear_triggers:
+      - "Texas milestones slip by more than one quarter"
+      - "Gross margin stalls below target range"
+      - "ATM / dilution accelerates without clear capacity payoff"
+      - "Customer concentration worsens without new customer additions"
+      - "Geopolitical risk around Ningbo operations increases"
+    next_checkpoints:
+      - "Gross margin trajectory"
+      - "Texas capacity mix"
+      - "800G and 1.6T customer diversification"
+      - "ATM usage and dilution pace"
+      - "Evidence that new capacity converts into revenue"
+    key_questions:
+      - "Is AAOI truly becoming a bottleneck supplier?"
+      - "Can management execute expansion without destroying margin?"
+      - "Will customer concentration improve before scale peaks?"
+
+  - ticker: LITE
+    company: Lumentum
+    layer:
+      - lasers
+      - components
+      - optical_engine
+    thesis: >
+      LITE is a higher-quality laser / component leader with stronger margin structure and better established positioning,
+      but upside may depend on whether it captures the most attractive AI optical bottleneck layers fast enough.
+    bull_triggers:
+      - "AI-related optical demand remains strong"
+      - "Margin stays resilient while AI mix rises"
+      - "InP / EML shortage reinforces pricing and allocation power"
+      - "New fab roadmap supports longer-term scale"
+    bear_triggers:
+      - "AI optical growth disappoints versus expectations"
+      - "Competitive share loss in key laser categories"
+      - "Execution delays in capacity roadmap"
+    next_checkpoints:
+      - "AI optical revenue contribution"
+      - "EML / InP shortage commentary"
+      - "Margin durability"
+      - "North Carolina fab timing"
+    key_questions:
+      - "Is LITE the quality leader but slower mover versus AAOI?"
+      - "How much upside is already reflected in valuation?"
+
+  - ticker: COHR
+    company: Coherent
+    layer:
+      - lasers
+      - optics
+      - modules
+    thesis: >
+      COHR has broad optical and laser exposure across the stack, which can be a strength in AI optics,
+      but execution complexity and portfolio breadth can dilute pure-play bottleneck upside.
+    bull_triggers:
+      - "AI datacenter optical demand lifts segment mix"
+      - "Margin improvement from better product mix"
+      - "Clear wins in next-gen transceiver / optical engine demand"
+    bear_triggers:
+      - "Portfolio complexity masks AI benefit"
+      - "Margin recovery remains weak"
+      - "AI demand does not translate into earnings leverage"
+    next_checkpoints:
+      - "AI-related revenue disclosure"
+      - "Datacenter communications segment trend"
+      - "Margin and operating leverage"
+    key_questions:
+      - "Is COHR too broad to be re-rated as a bottleneck winner?"
+
+  - ticker: MRVL
+    company: Marvell
+    layer:
+      - dsp
+      - asic
+      - connectivity
+    thesis: >
+      MRVL is a key enabler in the DSP / connectivity layer for AI infrastructure,
+      with upside tied to sustained hyperscaler capex and design-win durability.
+    bull_triggers:
+      - "Cloud and AI revenue keeps accelerating"
+      - "DSP / interconnect demand remains supply-constrained"
+      - "Design wins expand into next-gen optical and networking platforms"
+    bear_triggers:
+      - "Hyperscaler spending normalizes faster than expected"
+      - "Competitive pressure reduces share in optical DSP / connectivity"
+      - "AI enthusiasm runs ahead of realized revenue"
+    next_checkpoints:
+      - "Cloud revenue growth"
+      - "AI revenue mix"
+      - "Design-win commentary"
+    key_questions:
+      - "How much of the AI optics thesis is already priced into MRVL?"
+
+  - ticker: NOK
+    company: Nokia
+    layer:
+      - systems
+      - networking
+      - integration
+    thesis: >
+      NOK is a lower-consensus systems-layer beneficiary if AI datacenter and transport networking spend broadens,
+      but market conviction depends on whether AI exposure becomes material rather than thematic.
+    bull_triggers:
+      - "AI-ready datacenter and transport networking wins increase"
+      - "Hyperscaler / datacenter tie-ups become more visible"
+      - "Market starts valuing Nokia as an AI networking beneficiary"
+    bear_triggers:
+      - "AI exposure stays small and narrative-only"
+      - "Traditional telecom weakness offsets AI gains"
+      - "Execution or margin pressure persists"
+    next_checkpoints:
+      - "AI networking project announcements"
+      - "Datacenter-related wins"
+      - "Segment mix shift"
+    key_questions:
+      - "Is Nokia an underfollowed system-layer optionality play?"
+
+  - ticker: AXTI
+    company: AXT
+    layer:
+      - inp_substrate
+    thesis: >
+      AXTI is a substrate-layer bottleneck thesis centered on InP supply concentration.
+      If InP becomes a real industry bottleneck, substrate suppliers with scale and credibility may gain strategic importance.
+    bull_triggers:
+      - "Industry commentary confirms InP shortage"
+      - "InP demand rises with 800G / 1.6T and laser expansion"
+      - "Customers emphasize secure substrate sourcing"
+    bear_triggers:
+      - "InP bottleneck does not materialize economically"
+      - "Alternative supply expands faster than expected"
+      - "Revenue does not respond to industry narrative"
+    next_checkpoints:
+      - "InP revenue mix or commentary"
+      - "Supply concentration evidence"
+      - "Customer demand visibility"
+    key_questions:
+      - "Is AXTI truly the substrate bottleneck, or just a thematic proxy?"
+
+workflow_defaults:
+  create_reports_in:
+    daily: reports/daily
+    weekly: reports/weekly
+  preserve_existing_notes: true
+  prefer_new_files_over_edits: true
+  default_report_sections:
+    - summary
+    - by_ticker
+    - cross_sector_signals
+    - priority_watchlist
+    - next_checkpoints

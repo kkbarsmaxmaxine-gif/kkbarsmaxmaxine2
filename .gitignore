@@ -1,0 +1,33 @@
+# Secrets
+automation/.env
+*.env
+.env.*
+.claude/settings.local.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Data outputs — large/ephemeral, not for repo
+decision_system/data/*.json
+decision_system/journal/*.md
+decision_system/journal/*.log
+decision_system/packets/*.json
+automation/output/
+
+# Editor
+.vscode/
+.idea/
+*.swp
