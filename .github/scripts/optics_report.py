@@ -1,6 +1,7 @@
 """
-optics_report.py — Optical communications daily/weekly report generator (zh-TW)
-Reads data/watchlist.yaml + latest decision_packet, outputs reports/daily/YYYYMMDD.md
+optics_report.py — Optical communications daily report generator (zh-TW)
+Reads data/watchlist.yaml + latest decision_packet, calls MiniMax for analysis,
+outputs reports/daily/REPORT_FILENAME (default: YYYYMMDD.md)
 """
 
 import json
@@ -15,6 +16,8 @@ PACKET_DIR = ROOT / "decision_system" / "packets"
 DAILY_DIR  = ROOT / "reports" / "daily"
 WEEKLY_DIR = ROOT / "reports" / "weekly"
 
+OPTICS_TICKERS = ["AAOI", "LITE", "COHR", "MRVL", "NOK", "AXTI"]
+
 
 def load_watchlist() -> dict:
     with open(WATCHLIST, encoding="utf-8") as f:
@@ -22,14 +25,13 @@ def load_watchlist() -> dict:
 
 
 def tickers_by_symbol(wl: dict) -> dict:
-    """Convert list-based tickers to a dict keyed by symbol for easy lookup."""
     return {t["ticker"]: t for t in wl.get("tickers", [])}
 
 
 def load_packet(date_str: str) -> dict:
     path = PACKET_DIR / f"decision_packet_{date_str}.json"
     if not path.exists():
-        print(f"[optics_report] no packet for {date_str}, using empty data")
+        print(f"[optics_report] no packet for {date_str}, using empty market data")
         return {}
     with open(path, encoding="utf-8") as f:
         return json.load(f)
@@ -43,176 +45,165 @@ def _fmt_vol(val) -> str:
     return f"{val:.1f}x 均量" if val is not None else "—"
 
 
-def ticker_section(sym: str, info: dict, raw: dict) -> str:
-    company = info.get("company", sym)
-    layers  = " / ".join(info.get("layer", []))
-    d       = raw.get(sym, {})
-    price   = d.get("price", "—")
-    ret_1d  = d.get("ret_1d", None)
-    rsi     = d.get("rsi", "—")
-    vol     = d.get("vol_ratio", None)
-
-    bull = "\n".join(f"  - {t}" for t in info.get("bull_triggers", []))
-    bear = "\n".join(f"  - {t}" for t in info.get("bear_triggers", []))
-    checkpoints = "\n".join(f"  - {c}" for c in info.get("next_checkpoints", []))
-
-    return f"""### {sym} — {company}
-**層位**：{layers}
-**現價**：${price}  |  **單日**：{_fmt_ret(ret_1d)}  |  **量比**：{_fmt_vol(vol)}  |  **RSI**：{rsi}
-
-#### 1. 最新動態（過去 48 小時）
-_需要即時新聞查詢——本機執行 `/watch-optics` 或透過新聞 API 擴充此腳本。_
-
-#### 2. 論點評估：強化 / 弱化 / 不變
-**多頭觸發條件**：
-{bull}
-
-**空頭觸發條件**：
-{bear}
-
-_評估後標記三選一，對應具體觸發項目。_
-
-#### 3. 產能訊號
-_參考 next_checkpoints：_
-{checkpoints}
-
-#### 4. 客戶集中度變化
-_查閱最新季報及法說會管理層評論。_
-
-#### 5. 毛利率與稀釋訊號
-_查閱最新毛利率趨勢、流通股數、負債水位。_
-
-#### 6. 下一個關鍵檢查點
-_填入法說會日期、投資人日或產品里程碑。_
-
----
-"""
-
-
-def priority_signal_table(signals: list[str]) -> str:
-    rows = "\n".join(
-        f"| {s} | — | — |"
-        for s in signals
-    )
-    return f"""### 跨股訊號掃描
-
-| 訊號類型 | 觸發情況 | 影響標的 |
-|---------|---------|---------|
-{rows}
-"""
-
-
-def build_daily_report(wl: dict, packet: dict) -> str:
-    date_str  = datetime.now().strftime("%Y-%m-%d")
-    raw       = packet.get("raw_tickers", {})
-    mkt       = packet.get("market_summary", {})
+def build_market_snapshot(wl: dict, packet: dict) -> str:
+    """Build structured text snapshot to feed to MiniMax."""
+    date_str   = datetime.now().strftime("%Y-%m-%d")
+    raw        = packet.get("raw_tickers", {})
+    mkt        = packet.get("market_summary", {})
     ticker_map = tickers_by_symbol(wl)
-    order      = [t["ticker"] for t in wl.get("tickers", [])]
-    signals    = wl.get("monitoring_rules", {}).get("priority_signals", [])
     global_th  = wl.get("global_thesis", [])
-
-    qqq  = mkt.get("qqq_1d",  "—")
-    soxx = mkt.get("soxx_1d", "—")
-    qqq_str  = f"{qqq:+.2f}%"  if isinstance(qqq,  float) else str(qqq)
-    soxx_str = f"{soxx:+.2f}%" if isinstance(soxx, float) else str(soxx)
+    signals    = packet.get("signals", [])
 
     lines = [
-        f"# 光通訊族群監控日報 — {date_str}",
+        f"# 光通訊族群市場快照 — {date_str}",
         "",
-        f"**市場基準**：QQQ {qqq_str}  SOXX {soxx_str}",
+        f"市場基準：QQQ {mkt.get('qqq_1d', '—')}%  SOXX {mkt.get('soxx_1d', '—')}%",
         "",
         "## 全局假設",
-        "",
         *[f"- {t}" for t in global_th],
         "",
-        "---",
-        "",
+        "## 個股數據",
     ]
 
-    for sym in order:
-        info = ticker_map.get(sym, {"ticker": sym})
-        lines.append(ticker_section(sym, info, raw))
+    for sym in OPTICS_TICKERS:
+        d    = raw.get(sym, {})
+        info = ticker_map.get(sym, {})
+        lines += [
+            f"",
+            f"### {sym} — {info.get('company', sym)}",
+            f"層位: {', '.join(info.get('layer', []))}",
+            f"現價: ${d.get('price','—')}  單日: {_fmt_ret(d.get('ret_1d'))}  "
+            f"量比: {_fmt_vol(d.get('vol_ratio'))}  RSI: {d.get('rsi','—')}",
+            f"EMA8/22交叉: {d.get('crossover','—')}  距3M高點: {d.get('pct_from_high_3m','—')}%",
+            f"",
+            f"論點: {info.get('thesis','').strip()}",
+            f"多頭觸發: {'; '.join(info.get('bull_triggers', []))}",
+            f"空頭觸發: {'; '.join(info.get('bear_triggers', []))}",
+            f"下個檢查點: {'; '.join(info.get('next_checkpoints', []))}",
+        ]
 
-    lines.append(priority_signal_table(signals))
+    # Add any signals from rules engine
+    optics_signals = [s for s in signals if s.get("ticker") in OPTICS_TICKERS]
+    if optics_signals:
+        lines += ["", "## 規則引擎訊號"]
+        for s in optics_signals:
+            lines.append(f"- [{s.get('level','')}] {s.get('ticker')} {s.get('type','')}: {s.get('detail','')}")
 
-    # Sector pulse scaffold
+    return "\n".join(lines)
+
+
+def call_minimax(snapshot: str, wl: dict) -> str:
+    """Call MiniMax via Anthropic-compatible SDK and return analysis text."""
+    try:
+        import anthropic
+    except ImportError:
+        return "_MiniMax 分析不可用（anthropic SDK 未安裝）_"
+
+    base_url = os.getenv("ANTHROPIC_BASE_URL", "https://api.minimax.io/anthropic")
+    api_key  = os.getenv("MINIMAX_API_KEY", "")
+    model    = os.getenv("LLM_MODEL", "MiniMax-M2.5")
+
+    if not api_key:
+        return "_MiniMax 分析不可用（MINIMAX_API_KEY 未設定）_"
+
+    priority_signals = wl.get("monitoring_rules", {}).get("priority_signals", [])
+
+    system_prompt = """你是光通訊產業研究專員。根據提供的市場快照，產生結構化繁體中文分析報告。
+
+輸出格式嚴格遵守以下結構：
+
+## 摘要
+（2-3句整體市場狀況）
+
+## 個股分析
+對每一檔（AAOI / LITE / COHR / MRVL / NOK / AXTI）輸出：
+### [TICKER]
+**論點評估**: 強化 / 弱化 / 不變 — 一句話說明（必須對應具體多頭或空頭觸發條件）
+**技術訊號**: 根據 RSI / EMA 交叉 / 量比 說明
+**下個檢查點**: 最重要的一個
+
+## 跨股訊號
+依序掃描以下訊號，有觸發則說明，無則標「—」：
+""" + "\n".join(f"- {s}" for s in priority_signals) + """
+
+## 今日族群脈動
+- CPO 動能: 加速 / 穩定 / 降溫
+- 單日強弱排序: 由強到弱
+- 供應鏈訊號: AXTI→LITE/AAOI→COHR 鏈有無異動
+- 論點壓力測試: 今日最挑戰 CPO 多頭假設的事實
+
+## 優先觀察清單
+列出未來 2 週最值得追蹤的 3 個事件或數據點
+
+## 下個檢查點
+整體族群最重要的一個里程碑
+
+規則：不捏造數據。若數據不足，明確說明「數據不足，無法判斷」。"""
+
+    client = anthropic.Anthropic(base_url=base_url, api_key=api_key)
+    try:
+        message = client.messages.create(
+            model=model,
+            max_tokens=3500,
+            system=system_prompt,
+            messages=[{"role": "user", "content": snapshot}],
+        )
+        return next((b.text for b in message.content if hasattr(b, "text")), "（無輸出）")
+    except Exception as e:
+        return f"_MiniMax 呼叫失敗: {e}_"
+
+
+def build_report(wl: dict, packet: dict, analysis: str) -> str:
+    date_str   = datetime.now().strftime("%Y-%m-%d")
+    mkt        = packet.get("market_summary", {})
+    raw        = packet.get("raw_tickers", {})
+
+    qqq_str  = f"{mkt['qqq_1d']:+.2f}%"  if isinstance(mkt.get("qqq_1d"),  float) else "—"
+    soxx_str = f"{mkt['soxx_1d']:+.2f}%" if isinstance(mkt.get("soxx_1d"), float) else "—"
+
     sorted_ret = sorted(
-        order,
+        OPTICS_TICKERS,
         key=lambda s: -(raw.get(s, {}).get("ret_1d") or 0)
     )
     ranking = "  ".join(
-        f"{s}（{_fmt_ret(raw.get(s, {}).get('ret_1d'))}）"
-        for s in sorted_ret
+        f"{s}（{_fmt_ret(raw.get(s, {}).get('ret_1d'))}）" for s in sorted_ret
     )
 
-    lines += [
-        "",
-        "---",
-        "",
-        "### 今日族群脈動",
-        "",
-        f"- **CPO 動能**：_待評估_",
-        f"- **單日強弱排序**：{ranking}",
-        f"- **供應鏈訊號**：_AXTI → LITE/AAOI → COHR 需求鏈有無異動？_",
-        f"- **論點壓力測試**：_今日哪件事最挑戰 CPO 多頭假設？_",
-        f"- **下週重點觀察**：_填入跨族群最重要的 2 個事件_",
-        "",
-    ]
-    return "\n".join(lines)
+    return f"""# 光通訊族群監控日報 — {date_str}
 
+**市場基準**：QQQ {qqq_str}  SOXX {soxx_str}
+**單日強弱**：{ranking}
 
-def build_weekly_report(wl: dict) -> str:
-    today     = datetime.now()
-    week      = today.strftime("W%V")
-    order     = [t["ticker"] for t in wl.get("tickers", [])]
-    global_th = wl.get("global_thesis", [])
+---
 
-    lines = [
-        f"# 光通訊族群週報 — {today.strftime('%Y')}-{week}",
-        "",
-        "## 本週回顧",
-        "",
-        "_彙整本週五份日報。_",
-        "",
-        "## 各標的論點進展",
-        "",
-        *[f"- **{sym}**：強化 / 弱化 / 不變 — _說明原因_" for sym in order],
-        "",
-        "## 本週最高信心多頭",
-        "_標的 + 一句話理由_",
-        "",
-        "## 本週最高疑慮標的",
-        "_標的 + 一句話理由_",
-        "",
-        "## CPO 論點整體評級",
-        "_上調 / 下調 / 維持 — 一段話說明_",
-        "",
-        "## Global Thesis 本週驗證",
-        "",
-        *[f"- "{t}"\n  驗證結果：_填入_" for t in global_th],
-        "",
-    ]
-    return "\n".join(lines)
+{analysis}
+
+---
+_報告由 MiniMax M2.5 生成 | {date_str}_
+"""
 
 
 def run():
-    report_type = os.getenv("REPORT_TYPE", "daily")
-    date_str    = datetime.now().strftime("%Y%m%d")
-    wl          = load_watchlist()
+    date_str      = datetime.now().strftime("%Y%m%d")
+    report_type   = os.getenv("REPORT_TYPE", "daily")
+    filename      = os.getenv("REPORT_FILENAME", f"{date_str}.md")
+    wl            = load_watchlist()
+    packet        = load_packet(date_str)
+
+    print(f"[optics_report] 產生 {report_type} 報告...")
+    snapshot = build_market_snapshot(wl, packet)
+    analysis = call_minimax(snapshot, wl)
+    report   = build_report(wl, packet, analysis)
 
     if report_type == "weekly":
-        today = datetime.now()
-        week  = today.strftime("W%V")
-        out   = WEEKLY_DIR / f"{today.strftime('%Y')}-{week}.md"
+        out = WEEKLY_DIR / filename
         WEEKLY_DIR.mkdir(parents=True, exist_ok=True)
-        out.write_text(build_weekly_report(wl), encoding="utf-8")
-        print(f"[optics_report] 週報 → {out}")
     else:
-        packet = load_packet(date_str)
-        out    = DAILY_DIR / f"{date_str}.md"
+        out = DAILY_DIR / filename
         DAILY_DIR.mkdir(parents=True, exist_ok=True)
-        out.write_text(build_daily_report(wl, packet), encoding="utf-8")
-        print(f"[optics_report] 日報 → {out}")
+
+    out.write_text(report, encoding="utf-8")
+    print(f"[optics_report] ✅ 報告存入 {out}")
 
 
 if __name__ == "__main__":

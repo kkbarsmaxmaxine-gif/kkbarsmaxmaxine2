@@ -11,66 +11,54 @@ jobs:
 
     permissions:
       contents: write
-      pull-requests: read
-      issues: read
-      id-token: write
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Ensure folders exist
-        run: |
-          mkdir -p reports/daily
-          mkdir -p reports/weekly
-          mkdir -p data
-          mkdir -p .claude/commands
-
-      - name: Run Claude Code optical monitor via MiniMax
-        uses: anthropics/claude-code-action@v1
-        env:
-          ANTHROPIC_BASE_URL: ${{ secrets.ANTHROPIC_BASE_URL }}
-          ANTHROPIC_AUTH_TOKEN: ${{ secrets.ANTHROPIC_AUTH_TOKEN }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_AUTH_TOKEN }}
-          ANTHROPIC_DEFAULT_OPUS_MODEL: "MiniMax-M2.5"
-          ANTHROPIC_DEFAULT_SONNET_MODEL: "MiniMax-M2.5"
-          ANTHROPIC_DEFAULT_HAIKU_MODEL: "MiniMax-M2.5"
-          CLAUDE_CODE_SUBAGENT_MODEL: "MiniMax-M2.5"
-          CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS: "1"
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          prompt: |
-            You are running the optical communications monitoring workflow in this repository.
+          python-version: "3.11"
+          cache: pip
 
-            Follow the repo rules in:
-            - CLAUDE.md
-            - .claude/commands/watch-optics.md
-            - data/watchlist.yaml
+      - name: Install dependencies
+        run: pip install yfinance pandas numpy requests pyyaml python-dotenv anthropic
 
-            Your task:
-            1. Review the optical communications watchlist.
-            2. Generate a new daily markdown report in reports/daily/.
-            3. The filename must be:
-               optics-${{ github.run_id }}.md
-            4. The report must include:
-               - Summary
-               - By ticker
-               - Cross-sector signals
-               - Priority watchlist
-               - Next checkpoints
-            5. For each ticker, classify the thesis as:
-               - strengthened
-               - weakened
-               - unchanged
-            6. Do not modify existing notes in notes/ unless explicitly required.
-            7. Prefer creating a new report file over editing existing files.
-            8. If there is not enough new information, explicitly state that the thesis is unchanged and why.
+      - name: Run collector
+        run: python3 decision_system/collector.py
+        env:
+          PYTHONPATH: ${{ github.workspace }}
 
-          anthropic_api_key: ${{ secrets.ANTHROPIC_AUTH_TOKEN }}
+      - name: Run rules engine
+        run: python3 decision_system/rules.py
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      - name: Generate optics report via MiniMax
+        run: python3 .github/scripts/optics_report.py
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          REPORT_TYPE: daily
+          ANTHROPIC_BASE_URL: ${{ secrets.ANTHROPIC_BASE_URL }}
+          MINIMAX_API_KEY: ${{ secrets.ANTHROPIC_AUTH_TOKEN }}
+          LLM_MODEL: MiniMax-M2.5
+          REPORT_FILENAME: optics-${{ github.run_id }}.md
 
       - name: Commit report if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add reports/daily .claude data CLAUDE.md || true
-          git diff --cached --quiet || git commit -m "Add optical monitor report"
+          git add reports/daily reports/weekly
+          git diff --cached --quiet || git commit -m "Add optical monitor report (run ${{ github.run_id }})"
+          git push
+
+      - name: Log completed run
+        if: always()
+        run: |
+          echo "$(date '+%Y-%m-%d %H:%M:%S UTC')  [optics-monitor] run=${{ github.run_id }}  conclusion=${{ job.status }}" >> reports/run_log.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/run_log.txt
+          git diff --cached --quiet || git commit -m "Log run ${{ github.run_id }}"
           git push
