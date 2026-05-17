@@ -30,6 +30,8 @@ WATCHLIST: dict[str, str] = {
     "AAOI": "Applied Optoelectronics", "LITE": "Lumentum",
     "COHR": "Coherent",                "NOK":  "Nokia",
     "AXTI": "AXT",
+    # NAND 控制 IC（記憶體三條線—NAND 線代表）
+    "8299.TWO": "群聯",
     # 電力基建
     "PWR": "Quanta",       "STRL": "Sterling",
     # 基準 & 板塊
