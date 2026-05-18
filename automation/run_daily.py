@@ -1,6 +1,7 @@
 """
-run_daily.py — 完整每日掃描執行器（七模組）
-Layer 1: sentiment + sector_rotation + smart_money + insider + taiwan_chain + kol_monitor + us_watchlist
+run_daily.py — 完整每日掃描執行器（八模組）
+Layer 1: sentiment + sector_rotation + smart_money + insider + taiwan_chain
+         + kol_monitor + us_watchlist + trendforce_monitor
 Layer 3: claude_report
 Layer 4: notify (Telegram)
 
@@ -15,7 +16,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from modules import (
     sentiment, sector_rotation, smart_money, insider,
-    taiwan_chain, kol_monitor, us_watchlist,
+    taiwan_chain, kol_monitor, us_watchlist, trendforce_monitor,
     claude_report, notify,
 )
 
@@ -31,13 +32,14 @@ def run_daily_scan() -> None:
     scan_results = {}
 
     layer1 = [
-        ("sentiment",    "CNN Fear & Greed",    sentiment),
-        ("sector",       "板塊輪動",             sector_rotation),
-        ("smart_money",  "聰明錢籌碼",           smart_money),
-        ("insider",      "SEC 內部人申報",       insider),
-        ("us_watchlist", "美股個股掃描",          us_watchlist),
-        ("taiwan",       "台股三大法人",          taiwan_chain),
-        ("kol",          "財經新聞 RSS",         kol_monitor),
+        ("sentiment",    "CNN Fear & Greed",         sentiment),
+        ("sector",       "板塊輪動",                  sector_rotation),
+        ("smart_money",  "聰明錢籌碼",                smart_money),
+        ("insider",      "SEC 內部人申報",            insider),
+        ("us_watchlist", "美股個股掃描",               us_watchlist),
+        ("taiwan",       "台股三大法人",               taiwan_chain),
+        ("kol",          "KOL / 財經 RSS",           kol_monitor),
+        ("trendforce",   "TrendForce 記憶體 / CPO",  trendforce_monitor),
     ]
 
     for key, label, mod in layer1:

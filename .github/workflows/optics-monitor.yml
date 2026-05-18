@@ -44,6 +44,13 @@ jobs:
           LLM_MODEL: MiniMax-M2.5
           REPORT_FILENAME: optics-${{ github.run_id }}.md
 
+      - name: Run TrendForce monitor
+        run: python3 automation/modules/trendforce_monitor.py
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
       - name: Commit report and log
         if: always()
         run: |
