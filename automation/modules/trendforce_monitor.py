@@ -69,6 +69,27 @@ TOPICS = [
         "investment_tickers": ["AAOI", "LITE", "COHR", "FN", "MRVL"],
     },
     {
+        "id":       "satellite",
+        "label":    "衛星通訊 / ISL 雷射鏈路",
+        "emoji":    "🛰️",
+        "urls": [
+            "https://www.trendforce.com/tag/satellite/feed/",
+            "https://www.trendforce.com/tag/leo/feed/",
+        ],
+        "fallback_url": "https://www.trendforce.com/feed/",
+        "keywords": [
+            "satellite", "LEO", "MEO", "GEO", "constellation", "Starlink",
+            "Kuiper", "OneWeb", "Telesat", "Iridium",
+            "inter-satellite link", "ISL", "laser communication",
+            "free-space optical", "FSO", "Mynaric", "Tesat",
+            "direct-to-device", "D2D", "NTN", "non-terrestrial",
+            "ASTS", "AST SpaceMobile", "Rocket Lab", "RKLB",
+            "satellite broadband", "satellite IoT", "space",
+            "launch", "payload", "orbit", "transponder",
+        ],
+        "investment_tickers": ["ASTS", "RKLB", "IRDM", "MYNA", "GSAT", "COHR"],
+    },
+    {
         "id":       "semi_packaging",
         "label":    "先進封裝 / AI 晶片",
         "emoji":    "⚙️",

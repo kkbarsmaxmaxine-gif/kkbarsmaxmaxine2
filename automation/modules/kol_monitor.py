@@ -48,8 +48,10 @@ KOL_LIST = [
         "x_id":     "",
         "rss":      None,
         "keywords": ["Tesla", "xAI", "Grok", "AI", "energy", "GPU",
-                     "tariff", "China", "Starlink", "DOGE"],
-        "focus":    "Tesla / xAI / 政策訊號",
+                     "tariff", "China", "Starlink", "DOGE",
+                     "satellite", "SpaceX", "launch", "orbit", "LEO",
+                     "direct cell", "D2D", "Starship"],
+        "focus":    "Tesla / xAI / SpaceX Starlink / 政策訊號",
     },
     {
         "name":     "Ben Thompson",

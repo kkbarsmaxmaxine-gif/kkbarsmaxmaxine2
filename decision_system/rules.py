@@ -18,7 +18,11 @@ NEAR_HIGH_PCT   = 3.0    # 距3M高點 3% 以內
 RSI_OVERBOUGHT  = 72.0
 RSI_OVERSOLD    = 32.0
 
-FOCUS_STOCKS = ["DDOG", "NET", "FN", "ETN", "PLTR", "CSCO", "NVDA", "AMD", "AVGO", "MU", "TSM", "8299.TWO"]
+FOCUS_STOCKS = [
+    "DDOG", "NET", "FN", "ETN", "PLTR", "CSCO", "NVDA", "AMD", "AVGO", "MU", "TSM", "8299.TWO",
+    # 衛星族群
+    "ASTS", "RKLB", "IRDM", "MYNA", "GSAT",
+]
 BENCHMARKS   = ["QQQ", "SPY", "SOXX", "XLK"]
 
 

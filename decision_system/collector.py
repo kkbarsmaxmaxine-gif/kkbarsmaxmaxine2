@@ -32,6 +32,9 @@ WATCHLIST: dict[str, str] = {
     "AXTI": "AXT",
     # NAND 控制 IC（記憶體三條線—NAND 線代表）
     "8299.TWO": "群聯",
+    # 衛星通訊族群
+    "ASTS": "AST SpaceMobile", "RKLB": "Rocket Lab",
+    "IRDM": "Iridium",         "MYNA": "Mynaric",    "GSAT": "Globalstar",
     # 電力基建
     "PWR": "Quanta",       "STRL": "Sterling",
     # 基準 & 板塊

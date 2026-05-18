@@ -179,6 +179,173 @@ tickers:
     key_questions:
       - "Is AXTI truly the substrate bottleneck, or just a thematic proxy?"
 
+# ─── 衛星通訊產業鏈 ───────────────────────────────────────────────────────────
+
+satellite_thesis:
+  global_thesis:
+    - "LEO 星座建設仍在早期，資本支出週期長，真正的商業化落後於敘事 3-5 年。"
+    - "最大受益者可能是技術瓶頸層，而非每一層等比例受益。"
+    - "ISL 雷射鏈路是與光通訊產業鏈最直接的技術交叉點（CPO 橋接）。"
+    - "D2D（衛星直連手機）若成功，TAM 巨大但資本需求與稀釋風險同樣巨大。"
+
+  monitoring_rules:
+    priority_signals:
+      - constellation_launch_progress  # 衛星發射進度 vs 計畫
+      - d2d_commercial_subscribers     # D2D 實際商用用戶數
+      - isl_contract_wins              # ISL terminal 合約
+      - capex_burn_rate                # 資金燃燒速度
+      - dilution_pace                  # ATM / 股票稀釋
+      - government_contract            # 政府合約（DoD / NASA）
+      - hyperscaler_partnership        # 雲端業者（Amazon Kuiper 進度）
+      - launch_cadence                 # 發射次數 vs 計畫
+      - asp_pricing_trend              # 終端 / 元件 ASP 走勢
+      - competitor_tech_progress       # Tesat / SpaceX 競品進度
+
+satellite_tickers:
+  - ticker: ASTS
+    company: AST SpaceMobile
+    layer:
+      - d2d_operator
+      - constellation
+    thesis: >
+      ASTS 是最純粹的 D2D（衛星直連手機）純股，BlueBird 星座若完整部署，
+      TAM 覆蓋全球所有手機用戶。核心問題是資本密集度與稀釋速度能否被商業化收入覆蓋。
+      市場目前定價的假設是：星座能按計畫部署，且 MNO 合作夥伴（AT&T、Verizon、Vodafone）
+      轉換成真實的 ARPU 貢獻。
+    bull_triggers:
+      - "BlueBird Block 2 衛星發射如期或提前"
+      - "付費商用用戶數季度披露超預期"
+      - "新增 MNO 合作夥伴（尤其是亞洲電信商）"
+      - "D2D ASP 或 ARPU 指引高於市場預估"
+      - "政府 / DoD D2D 合約出現"
+    bear_triggers:
+      - "ATM 發行規模季度持續擴大"
+      - "發射延誤超過一個季度"
+      - "MNO 合作夥伴轉為觀望 / 不續約"
+      - "Starlink D2D 搶先商用化並壓低定價"
+      - "現金跑道不足 12 個月"
+    next_checkpoints:
+      - "BlueBird Block 2 發射時程"
+      - "付費用戶數首次披露"
+      - "MNO 合作夥伴收入貢獻"
+      - "ATM 使用量 vs 現金水位"
+    key_questions:
+      - "市場是否高估了 D2D ARPU 假設？"
+      - "資本密集度是否被低估（每顆衛星成本 + 地面系統）？"
+      - "Starlink D2D 進度是否讓 ASTS 時間窗口縮小？"
+
+  - ticker: RKLB
+    company: Rocket Lab
+    layer:
+      - launch_vehicle
+      - satellite_systems
+    thesis: >
+      RKLB 是「發射 + 衛星系統」雙線成長股，Electron 是現役最高頻率小型火箭，
+      Neutron 若成功是 Falcon 9 的直接競品（中型 LEO）。
+      Space Systems 部門（衛星元件 + 整星）提供穩定收入底座。
+      市場定價主要在 Neutron 的成功機率與時程。
+    bull_triggers:
+      - "Neutron 關鍵里程碑（引擎測試 / 首飛日期）確認"
+      - "Electron 發射次數季度新高"
+      - "Space Systems 合約金額擴大（尤其是政府）"
+      - "被選為 NASA / DoD 主要承包商"
+      - "有意義的 EBITDA 轉正時程"
+    bear_triggers:
+      - "Neutron 研發 delay 超過兩個季度"
+      - "Electron 發射失敗或頻率下降"
+      - "SpaceX 搶走 Neutron 目標市場的關鍵客戶"
+      - "資本支出超出計畫，現金跑道壓縮"
+    next_checkpoints:
+      - "Neutron 引擎測試進度"
+      - "Electron 年發射次數"
+      - "Space Systems 收入成長率"
+      - "自由現金流轉正時程"
+    key_questions:
+      - "Neutron 是否能在市場空窗期完成首飛？"
+      - "市場是否低估了 Space Systems 的收入底座穩定性？"
+
+  - ticker: IRDM
+    company: Iridium
+    layer:
+      - leo_constellation
+      - iot_government
+    thesis: >
+      IRDM 是成熟 LEO 星座，主要服務政府（DoD）、海事、航空、IoT。
+      自由現金流穩定，有股息潛力。核心問題是 D2D 新玩家（ASTS、Starlink）
+      長期是否侵蝕其利基市場，以及成長空間是否被市場充分定價。
+    bull_triggers:
+      - "政府合約（DoD）續約或擴大"
+      - "IoT / 直連設備客戶數加速成長"
+      - "自由現金流超預期"
+      - "股息宣布或回購計畫"
+    bear_triggers:
+      - "Starlink / OneWeb 進入海事 / 航空市場壓縮份額"
+      - "D2D 侵蝕窄頻 IoT 需求"
+      - "政府預算削減影響 DoD 合約"
+    next_checkpoints:
+      - "服務用戶數 ARPU 趨勢"
+      - "政府收入佔比"
+      - "FCF 轉換率"
+    key_questions:
+      - "市場是否已充分定價 IRDM 的成熟期低成長？"
+      - "D2D 威脅是否在三年內真實侵蝕其護城河？"
+
+  - ticker: MYNA
+    company: Mynaric
+    layer:
+      - isl_laser_terminal  # 衛星雷射星間鏈路 ← CPO 技術橋接
+    thesis: >
+      MYNA 是唯一純粹聚焦「衛星雷射星間鏈路終端機（ISL Terminal）」的上市公司，
+      是光通訊（CPO）技術在太空的直接延伸。
+      Starlink Gen2 / Amazon Kuiper / Telesat Lightspeed 等均需要 ISL Terminal。
+      市值極小（~$50-100M），若 ISL 成為 LEO 星座標準，現有市值相對 TAM 嚴重低估。
+      核心風險：燃燒率高、競爭對手 Tesat（Airbus 子公司，非上市）技術更成熟。
+    bull_triggers:
+      - "Telesat Lightspeed ISL 合約執行確認"
+      - "美國政府 / SDA（Space Development Agency）合約"
+      - "Amazon Kuiper ISL 供應商選定（若 MYNA 入選）"
+      - "季度收入超預期 / 燃燒率下降"
+    bear_triggers:
+      - "現金跑道低於 6 個月且無融資計畫"
+      - "Tesat 或其他競爭者贏得主要合約"
+      - "Kuiper / Starlink 選擇自研 ISL"
+      - "Telesat 計畫延遲導致訂單推遲"
+    next_checkpoints:
+      - "現金水位 vs 燃燒率（每季披露）"
+      - "SDA / 政府 ISL 合約得標"
+      - "Telesat Lightspeed 批量交貨"
+      - "競爭對手技術進度（Tesat）"
+    key_questions:
+      - "MYNA 的現金跑道能撐到大訂單落地嗎？"
+      - "ISL Terminal 市場最終會是幾家分食？"
+      - "這是 CPO 光學鏈的太空版，還是完全不同的競爭格局？"
+
+  - ticker: GSAT
+    company: Globalstar
+    layer:
+      - d2d_operator
+      - spectrum_asset
+    thesis: >
+      GSAT 的核心價值不是公司本身，而是 Band 53 / n53 頻譜資產，
+      目前 Apple 是最大客戶（iPhone 緊急 SOS + 衛星簡訊）。
+      若 Apple 持續擴大服務或為其建立 D2D 能力，GSAT 有極大非對稱 upside；
+      但若 Apple 不續約或轉向 ASTS，下行空間同樣巨大。典型的二元賭注。
+    bull_triggers:
+      - "Apple 宣布擴大服務範圍 / 新機型繼續支援"
+      - "Band 53 頻譜新授權或新合作夥伴"
+      - "D2D 商用收費服務推出"
+    bear_triggers:
+      - "Apple 轉向 ASTS 或 SpaceX Starlink D2D"
+      - "Apple 合約到期不續"
+      - "Band 53 競爭頻譜出現"
+    next_checkpoints:
+      - "Apple 合約披露或新聞"
+      - "D2D 商用化時程"
+      - "收入集中度（Apple 佔比）"
+    key_questions:
+      - "Apple 的議價能力是否讓 GSAT 永遠只是配角？"
+      - "GSAT 有沒有不依賴 Apple 的第二條路？"
+
 workflow_defaults:
   create_reports_in:
     daily: reports/daily
