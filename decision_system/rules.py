@@ -21,8 +21,14 @@ RSI_OVERSOLD    = 32.0
 FOCUS_STOCKS = [
     "DDOG", "NET", "FN", "ETN", "PLTR", "CSCO", "NVDA", "AMD", "AVGO", "MU", "TSM", "8299.TWO",
     # 衛星族群
-    "ASTS", "RKLB", "IRDM", "MYNA", "GSAT",
+    "ASTS", "RKLB", "IRDM", "GSAT",  # MYNA 已下市
+    # 能源 / AI 電力
+    "VST", "CEG", "CCJ", "OKLO", "FSLR",
+    # 機器人 / Physical AI
+    "TSLA", "ISRG", "ROK", "HON",
 ]
+# 總經代理 ETF — 納入每日 packet 但不產生個股訊號
+MACRO_TICKERS = ["GLD", "TLT", "UUP", "USO", "COPX"]
 BENCHMARKS   = ["QQQ", "SPY", "SOXX", "XLK"]
 
 
@@ -41,7 +47,7 @@ def detect_signals(tickers: dict, qqq_1m: float) -> list[dict]:
     signals = []
 
     for sym, d in tickers.items():
-        if sym in BENCHMARKS:
+        if sym in BENCHMARKS or sym in MACRO_TICKERS:
             continue
 
         ret  = d["ret_1d"]

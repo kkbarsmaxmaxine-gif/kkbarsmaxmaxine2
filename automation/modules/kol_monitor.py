@@ -71,6 +71,48 @@ KOL_LIST = [
                      "capital allocation", "moat", "compounding"],
         "focus":    "頂尖投資人訪談摘要",
     },
+    {
+        "name":     "Reuters 總經 / 貿易政策",
+        "handle":   "",
+        "x_id":     "",
+        "rss":      "https://feeds.reuters.com/reuters/businessNews",
+        "keywords": [
+            "tariff", "trade war", "trade deal", "China", "semiconductor",
+            "export control", "CHIPS Act", "AI regulation",
+            "Federal Reserve", "Fed", "interest rate", "rate cut", "rate hike",
+            "inflation", "CPI", "PCE", "GDP", "recession",
+            "White House", "executive order", "Congress",
+            "Nvidia", "TSMC", "Huawei", "sanctions", "blacklist",
+        ],
+        "focus":    "總經政策 / 貿易 / AI 監管 / Fed",
+    },
+    {
+        "name":     "Reuters 地緣政治",
+        "handle":   "",
+        "x_id":     "",
+        "rss":      "https://feeds.reuters.com/reuters/worldNews",
+        "keywords": [
+            "China", "Taiwan", "strait", "semiconductor", "chip war",
+            "tariff", "trade", "military", "export ban", "Russia",
+            "Ukraine", "Middle East", "NATO", "TSMC",
+            "Huawei", "sanctions", "geopolit",
+        ],
+        "focus":    "地緣政治 / 台海 / 制裁 / 晶片戰",
+    },
+    {
+        "name":     "機器人 / 能源政策",
+        "handle":   "",
+        "x_id":     "",
+        "rss":      "https://feeds.reuters.com/reuters/technologyNews",
+        "keywords": [
+            "robot", "humanoid", "Optimus", "Figure", "Boston Dynamics",
+            "nuclear", "power", "electricity", "energy", "datacenter power",
+            "uranium", "SMR", "Constellation", "Vistra",
+            "CPO", "co-packaged", "optical", "800G", "1.6T",
+            "satellite", "Starlink", "LEO", "direct-to-cell",
+        ],
+        "focus":    "機器人 / 核能 / CPO / 衛星政策新聞",
+    },
 ]
 
 LOOKBACK_HOURS = 25

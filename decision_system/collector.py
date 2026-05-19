@@ -34,7 +34,17 @@ WATCHLIST: dict[str, str] = {
     "8299.TWO": "群聯",
     # 衛星通訊族群
     "ASTS": "AST SpaceMobile", "RKLB": "Rocket Lab",
-    "IRDM": "Iridium",         "MYNA": "Mynaric",    "GSAT": "Globalstar",
+    "IRDM": "Iridium",                               "GSAT": "Globalstar",
+    # MYNA (Mynaric) 已從 NASDAQ 下市，暫移除
+    # 能源 / AI 電力
+    "VST":  "Vistra Energy",   "CEG":  "Constellation", "CCJ": "Cameco",
+    "OKLO": "Oklo",            "FSLR": "First Solar",
+    # 機器人 / Physical AI
+    "TSLA": "特斯拉",           "ISRG": "直覺外科",   "ROK": "Rockwell",
+    "HON":  "霍尼韋爾",
+    # 總經代理（ETF + 指數）
+    "GLD":  "黃金ETF",   "TLT": "20Y美債ETF", "UUP": "美元指數ETF",
+    "USO":  "油ETF",     "COPX": "銅礦ETF",
     # 電力基建
     "PWR": "Quanta",       "STRL": "Sterling",
     # 基準 & 板塊

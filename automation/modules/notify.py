@@ -1111,6 +1111,220 @@ def send_daily_report(report: str) -> bool:
     return ok
 
 
+# ─── 通用板塊快照卡 ───────────────────────────────────────────────────────────
+
+def _fetch_sector_data(tickers: list[str]) -> dict:
+    """批次抓取一組標的的技術快照（單次 API call）"""
+    try:
+        raw = yf.download(
+            tickers, period="3mo", auto_adjust=True, progress=False, threads=True
+        )
+    except Exception:
+        return {}
+
+    results = {}
+    is_multi = isinstance(raw.columns, pd.MultiIndex)
+
+    for ticker in tickers:
+        try:
+            if is_multi:
+                df = raw.xs(ticker, axis=1, level=1).dropna(how="all")
+            else:
+                df = raw.dropna(how="all")
+
+            if len(df) < 10:
+                continue
+
+            close = df["Close"]
+            price  = float(close.iloc[-1])
+            ret_1d = (price / float(close.iloc[-2]) - 1) * 100
+            ret_1m = (price / float(close.iloc[-22]) - 1) * 100 if len(close) >= 22 else 0.0
+
+            ema8   = close.ewm(span=8,  adjust=False).mean()
+            ema22  = close.ewm(span=22, adjust=False).mean()
+            cross_now  = float(ema8.iloc[-1]) > float(ema22.iloc[-1])
+            cross_prev = float(ema8.iloc[-2]) > float(ema22.iloc[-2])
+            if cross_now and not cross_prev:
+                cross = "🟢金叉"
+            elif not cross_now and cross_prev:
+                cross = "🔴死叉"
+            elif cross_now:
+                cross = "↑"
+            else:
+                cross = "↓"
+
+            delta = close.diff()
+            gain  = delta.clip(lower=0).rolling(14).mean()
+            loss  = (-delta.clip(upper=0)).rolling(14).mean()
+            rsi   = float((100 - 100 / (1 + gain / loss)).iloc[-1])
+
+            vol   = df.get("Volume")
+            vol_r = None
+            if vol is not None and len(vol) >= 21:
+                avg20 = float(vol.iloc[-21:-1].mean())
+                if avg20 > 0:
+                    vol_r = float(vol.iloc[-1]) / avg20
+
+            results[ticker] = {
+                "ticker": ticker, "price": price,
+                "ret_1d": ret_1d, "ret_1m": ret_1m,
+                "rsi": rsi, "cross": cross, "vol_r": vol_r,
+            }
+        except Exception:
+            pass
+
+    return results
+
+
+def format_sector_card(label: str, emoji: str, tickers: list[str]) -> str:
+    """通用板塊快照 Telegram 卡（支援 CPO / 能源 / 機器人 / 衛星等任意組合）"""
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    data     = _fetch_sector_data(tickers)
+    snaps    = [data[t] for t in tickers if t in data]
+
+    if not snaps:
+        return f"{emoji} *{label}* {date_str}\n\n⚠️ 無法取得資料"
+
+    snaps_by_ret = sorted(snaps, key=lambda x: -x["ret_1d"])
+    best  = snaps_by_ret[0]
+    worst = snaps_by_ret[-1]
+
+    lines = [f"{emoji} *{label}* {date_str}", ""]
+
+    for s in snaps:
+        rsi_flag = "🔴" if s["rsi"] > 70 else ("🟢" if s["rsi"] < 32 else "  ")
+        vol_flag = f" 🔥{s['vol_r']:.1f}x" if s["vol_r"] and s["vol_r"] >= 2.0 else ""
+        lines.append(
+            f"`{s['ticker']:<6}` "
+            f"${s['price']:<8.2f} "
+            f"`{s['ret_1d']:+5.1f}%` "
+            f"1M`{s['ret_1m']:+5.1f}%`  "
+            f"RSI{s['rsi']:.0f}{rsi_flag} {s['cross']}{vol_flag}"
+        )
+
+    lines += [
+        "",
+        f"↑ {best['ticker']} `{best['ret_1d']:+.1f}%`   "
+        f"↓ {worst['ticker']} `{worst['ret_1d']:+.1f}%`",
+    ]
+
+    overbought = [s["ticker"] for s in snaps if s["rsi"] > 70]
+    oversold   = [s["ticker"] for s in snaps if s["rsi"] < 32]
+    if overbought:
+        lines.append(f"⚠️ RSI 超買：{', '.join(overbought)}")
+    if oversold:
+        lines.append(f"📌 RSI 超賣：{', '.join(oversold)}")
+
+    return "\n".join(lines)
+
+
+def send_sector_card(label: str, emoji: str, tickers: list[str]) -> bool:
+    msg = format_sector_card(label, emoji, tickers)
+    ok  = send_message(msg)
+    if ok:
+        print(f"[notify] ✅ {label} 板塊卡推播成功")
+    return ok
+
+
+# ─── 總經儀表板 ───────────────────────────────────────────────────────────────
+
+_MACRO_ASSETS = {
+    "GLD": "黃金", "TLT": "20Y美債", "UUP": "美元",
+    "USO": "原油", "COPX": "銅礦",
+}
+
+def _fetch_index(symbol: str) -> Optional[float]:
+    try:
+        df = yf.download(symbol, period="5d", auto_adjust=True, progress=False)
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+        return float(df["Close"].dropna().iloc[-1])
+    except Exception:
+        return None
+
+
+def format_macro_card() -> str:
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    lines    = [f"🌐 *總經儀表板* {date_str}", ""]
+
+    # VIX
+    vix = _fetch_index("^VIX")
+    if vix:
+        if vix > 30:
+            vstatus = "🔴 恐慌區"
+        elif vix > 20:
+            vstatus = "⚠️ 警戒"
+        elif vix < 15:
+            vstatus = "😴 過樂觀"
+        else:
+            vstatus = "✅ 正常"
+        lines.append(f"VIX  `{vix:.1f}`  {vstatus}")
+
+    # 殖利率曲線
+    tnx = _fetch_index("^TNX")   # 10Y，單位 %×10 在某些版本，需除以 10？
+    # yfinance ^TNX 返回值已是百分比（e.g. 4.5 表示 4.5%），無需除以 10
+    irx = _fetch_index("^IRX")   # 13W T-bill
+    if tnx and irx:
+        spread = tnx - irx
+        curve  = "✅ 正斜率" if spread > 0 else "⚠️ 倒掛"
+        lines.append(f"10Y `{tnx:.2f}%`  短端 `{irx:.2f}%`  曲線 `{spread:+.2f}%` {curve}")
+    elif tnx:
+        lines.append(f"美10Y殖利率 `{tnx:.2f}%`")
+
+    lines.append("")
+
+    # 資產類別
+    asset_data = _fetch_sector_data(list(_MACRO_ASSETS.keys()))
+    for ticker, name in _MACRO_ASSETS.items():
+        if ticker not in asset_data:
+            continue
+        s = asset_data[ticker]
+        flag = "🔴" if s["ret_1d"] < -1.5 else ("🟢" if s["ret_1d"] > 1.5 else "  ")
+        lines.append(
+            f"{flag} {name} ({ticker})  "
+            f"`{s['ret_1d']:+.1f}%`  1M`{s['ret_1m']:+.1f}%`"
+        )
+
+    lines.append("")
+
+    # 訊號解讀
+    gld  = asset_data.get("GLD")
+    uup  = asset_data.get("UUP")
+    tlt  = asset_data.get("TLT")
+    copx = asset_data.get("COPX")
+    uso  = asset_data.get("USO")
+
+    signals = []
+    if gld and uup and gld["ret_1d"] > 0.5 and uup["ret_1d"] > 0.3:
+        signals.append("⚡ 黃金 + 美元同漲 → 市場壓力對沖")
+    if tlt and tlt["ret_1m"] > 3:
+        signals.append("📉 長債走強 → 市場預期降息 / 避險需求")
+    if tlt and tlt["ret_1m"] < -3:
+        signals.append("📈 長債走弱 → 升息預期 / 通膨壓力")
+    if copx and copx["ret_1m"] < -5:
+        signals.append("⚠️ 銅走弱 → 全球工業需求降溫訊號")
+    if copx and copx["ret_1m"] > 5:
+        signals.append("✅ 銅走強 → 工業需求復甦")
+    if uso and uso["ret_1m"] > 8:
+        signals.append("⚠️ 油價大漲 → 通膨壓力 / 地緣訊號")
+    if vix and vix > 25:
+        signals.append(f"🔴 VIX {vix:.0f} 偏高 → 考慮降低風險敞口")
+
+    if signals:
+        lines.append("*訊號解讀*")
+        lines += [f"• {s}" for s in signals]
+
+    return "\n".join(lines)
+
+
+def send_macro_card() -> bool:
+    msg = format_macro_card()
+    ok  = send_message(msg)
+    if ok:
+        print("[notify] ✅ 總經儀表板推播成功")
+    return ok
+
+
 # ─── 主函式 ────────────────────────────────────────────────────────────────────
 def run(scan_results: dict, ai_report: str = "") -> dict:
     """執行推播流程（三則訊息）"""
@@ -1143,7 +1357,34 @@ def run(scan_results: dict, ai_report: str = "") -> dict:
     # 7. CSCO Splunk 轉型監測卡片（每日例行）
     results["csco_sent"] = send_csco_card()
 
-    # 8. 完整 AI 報告（有才推）
+    # 8. 板塊快照：CPO 光通訊
+    results["cpo_sent"] = send_sector_card(
+        "CPO 光通訊產業鏈", "🔆",
+        ["AAOI", "LITE", "COHR", "MRVL", "FN", "NOK", "AXTI"],
+    )
+
+    # 9. 板塊快照：AI 電力 / 能源
+    results["energy_sent"] = send_sector_card(
+        "AI 電力 / 能源", "⚡",
+        ["ETN", "VST", "CEG", "CCJ", "OKLO", "FSLR", "PWR"],
+    )
+
+    # 10. 板塊快照：機器人 / Physical AI
+    results["robot_sent"] = send_sector_card(
+        "機器人 / Physical AI", "🤖",
+        ["TSLA", "NVDA", "ISRG", "ROK", "HON"],
+    )
+
+    # 11. 板塊快照：衛星通訊
+    results["sat_sent"] = send_sector_card(
+        "衛星通訊", "🛰",
+        ["ASTS", "RKLB", "IRDM", "GSAT"],  # MYNA 已下市
+    )
+
+    # 12. 總經儀表板
+    results["macro_sent"] = send_macro_card()
+
+    # 13. 完整 AI 報告（有才推）
     if ai_report:
         results["report_sent"] = send_daily_report(ai_report)
 
